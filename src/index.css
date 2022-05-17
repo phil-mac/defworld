@@ -3,6 +3,9 @@
 @tailwind utilities;
 
 @layer base {
+  html {
+    background: black;
+  }
   html, body {
     @apply h-full;
   }
@@ -10,8 +13,6 @@
     @apply stroke-white;
     @apply stroke-2;
     @apply bg-gray-900;
-  }
-  h1, h2, h3, h4, h5, h6, p, li, button {
     @apply text-green-200;
   }
   h1 {
