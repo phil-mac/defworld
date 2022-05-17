@@ -1,0 +1,48 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    @apply h-full;
+  }
+  body {
+    @apply stroke-white;
+    @apply stroke-2;
+    @apply bg-gray-900;
+  }
+  h1, h2, h3, h4, h5, h6, p, li, button {
+    @apply text-green-200;
+  }
+  h1 {
+    @apply text-6xl;
+  }
+  h2 {
+    @apply text-5xl;
+    @apply font-bold;
+  }
+  h3 {
+    @apply text-4xl;
+    @apply font-bold;
+  }
+  h4 {
+    @apply text-2xl;
+  }
+  h5 {
+    @apply text-xl;
+  }
+  h6 {
+    @apply text-lg;
+  }
+  p {
+    @apply text-base;
+  }
+  a {
+/*     @apply text-accent-default; */
+/*     @apply hover:text-accent-stronger; */
+  }
+  path {
+    stroke: inherit !important;
+    stroke-width: inherit !important;
+  }
+}

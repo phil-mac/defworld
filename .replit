@@ -1,0 +1,4 @@
+run="npm run dev"
+entrypoint="src/App.tsx"
+
+hidden = ["package-lock.json", "postcss.config.js", "vite.config.ts"]
