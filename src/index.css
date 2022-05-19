@@ -6,7 +6,7 @@
   html {
     background: black;
   }
-  html, body {
+  html, body, #root {
     @apply h-full;
   }
   body {
@@ -37,6 +37,11 @@
   }
   p {
     @apply text-base;
+  }
+  textarea {
+    @apply bg-gray-800;
+    @apply p-2;
+    @apply outline-none;
   }
   a {
 /*     @apply text-accent-default; */

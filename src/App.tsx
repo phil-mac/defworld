@@ -5,18 +5,17 @@ import World from './pages/world';
 
 export default () => {
 
-  // hack to make the embedded replit browser route to home
   let navigate = useNavigate();
   React.useEffect(() => {
-    navigate('/', { replace: true });
+    navigate('/1', { replace: true });
   }, [])
   
   return (
-    <div>
+    <>
       <Routes>
         <Route path='/' element={<Home />} />
-        <Route path='/world' element={<World />} />
+        <Route path='/:worldId' element={<World />} />
       </Routes>
-    </div>
+    </>
   )
 }
