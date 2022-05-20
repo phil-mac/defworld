@@ -2,3 +2,12 @@ run="npm run dev"
 entrypoint="src/App.tsx"
 
 hidden = ["package-lock.json", "postcss.config.js", "vite.config.ts"]
+
+[packager]
+language = "nodejs-yarn"
+
+  [packager.features]
+  # Enables the package search sidebar
+  packageSearch = false
+  # Enabled package guessing
+  guessImports = false

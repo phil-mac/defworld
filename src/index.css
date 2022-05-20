@@ -38,7 +38,7 @@
   p {
     @apply text-base;
   }
-  textarea {
+  textarea, input {
     @apply bg-gray-800;
     @apply p-2;
     @apply outline-none;
