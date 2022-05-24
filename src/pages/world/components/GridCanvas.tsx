@@ -74,11 +74,11 @@ export default ({chunk, openNodeId, setOpenNodeId, worldId, ...rest}: any) => {
           for (let i = 0; i < chunk.length; i++) {
             const b = chunk[i];
             if (b[0] >= 1) {
-              console.log("block: ", b);
+              // console.log("block: ", b);
               let bx = i % gridSideLength;
               let by = Math.floor(i / gridSideLength);
               if (gridPos.x === bx && gridPos.y === by){
-                console.log("Clicked block: ", b);
+                // console.log("Clicked block: ", b);
                 if (b[1] === 50) {
                   // clicked a node
                   const ctx = e.target.getContext('2d');

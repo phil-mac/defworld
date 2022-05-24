@@ -7,7 +7,5 @@ hidden = ["package-lock.json", "postcss.config.js", "vite.config.ts"]
 language = "nodejs-yarn"
 
   [packager.features]
-  # Enables the package search sidebar
-  packageSearch = false
-  # Enabled package guessing
+  # Disable package guessing, since using relative imports
   guessImports = false

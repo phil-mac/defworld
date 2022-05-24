@@ -8,7 +8,7 @@ import { UserContext } from 'contexts/userContext';
 export default () => {
   let navigate = useNavigate();
   React.useEffect(() => {
-    navigate('/', { replace: true });
+    navigate('/1', { replace: true });
   }, []);
 
   const [user, setUser] = useState({username: 'Phil', id: 1});

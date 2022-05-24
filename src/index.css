@@ -39,9 +39,10 @@
     @apply text-base;
   }
   textarea, input {
-    @apply bg-gray-800;
+    @apply bg-gray-700;
     @apply p-2;
     @apply outline-none;
+    @apply rounded-lg;
   }
   a {
 /*     @apply text-accent-default; */

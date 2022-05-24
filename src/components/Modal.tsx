@@ -15,7 +15,7 @@ export default ({isOpen, setIsOpen, children}) => {
       />
       <div className='relative z-10'>
         <Button className='ml-auto mb-2 font-bold rounded-full' onClick={close}>╳</Button>
-        <div className='p-4 bg-green-900 rounded'>
+        <div className='p-8 bg-gray-800 rounded'>
           {children}
         </div>
       </div>

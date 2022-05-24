@@ -6,23 +6,29 @@ import Button from 'components/Button';
 import Page from 'components/Page';
 import Modal from 'components/Modal';
 import CreateWorldButton from './components/CreateWorldButton';
+import RecentWorldCard from './components/RecentWorldCard';
 
-const worlds = gql`
-  query Query {
+const homeQuery = gql`
+  query HomeQuery ($userId: ID!) {
     worlds {
       id
       name
-      nodes {
+    }
+    user (id: $userId) {
+      worldUsers {
         id
-        content
+        lastVisited
+        world {
+          name
+        }
       }
     }
   }
 `;
 
 export default () => {
-  const { loading, error, data } = useQuery(worlds);
   const user = useContext(UserContext);
+  const { loading, error, data } = useQuery(homeQuery, { variables: {userId: user.id}});
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error</p>;
@@ -36,13 +42,19 @@ export default () => {
       <h3 className='mt-12'>create</h3>
       <CreateWorldButton />
       <h3 className='mt-8'>recent</h3>
-      <div className='mt-4 flex gap-4'>
+      <div className='mt-4 flex gap-4 flex-wrap'>
+        {data.user.worldUsers.map((worldUser: any) => (
+          <RecentWorldCard 
+            key={worldUser.id}
+            worldId={worldUser.id} 
+            worldName={worldUser.world.name} 
+            lastVisited={worldUser.lastVisited}/>
+        ))}
+      </div>
+      <h3 className='mt-8'>all</h3>
+      <div className='mt-4 flex gap-4 flex-wrap'>
         {data.worlds.map((world: any) => (
-          <Link key={world.id} to={world.id}>
-            <Button >
-              <p>{world.name}</p>
-            </Button>
-          </Link>
+          <RecentWorldCard key={world.id} worldId={world.id} worldName={world.name}/>
         ))}
       </div>
     </Page>

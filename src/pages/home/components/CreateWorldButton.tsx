@@ -15,7 +15,7 @@ const CreateWorldMutation = gql`
 `;
 
 export default () => {
-  const [isModalOpen, setIsModalOpen] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const [createWorld] = useMutation(CreateWorldMutation);
   const navigate = useNavigate(); 
@@ -26,8 +26,9 @@ export default () => {
         <p className='text-4xl'>＋</p>
       </Button>
       <Modal isOpen={isModalOpen} setIsOpen={setIsModalOpen}>
+        <h4 className='mb-4'>Create a world</h4>
         <Formik
-          initialValues={{name: 'New world'}}
+          initialValues={{name: ''}}
           validate={values => {
             const errors = {};
             if (!values.name) {
@@ -43,7 +44,7 @@ export default () => {
           }}
         >
           <Form>
-            <Field type='text' name='name'/>
+            <Field type='text' name='name' placeholder='Enter world name'/>
             <ErrorMessage name='name' component='div' className='text-red-500'/>
             <Button className='mt-4'>+ Create world</Button>
           </Form>
