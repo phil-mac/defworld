@@ -1,4 +1,4 @@
-import React, { useState, createContext, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useNavigate } from 'react-router-dom';
 import Home from 'pages/home';
 import Join from 'pages/join';
@@ -15,7 +15,6 @@ export default () => {
 
   useEffect(() => {
     if (!user) {
-      console.log("navigate to join")
       navigate('/join', { replace: true });
     }
   }, [])
