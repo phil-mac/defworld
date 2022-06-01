@@ -21,17 +21,17 @@ const nodes = gql`
   }
 `;
 
-const worldSubscription = gql`
-  subscription OnNodeCreated($worldId: ID!) {
-    nodeCreated(worldId: $worldId) {
-      id
-      grid
-      nodes {
-        id
-      }
-    }
-  }
-`;
+// const worldSubscription = gql`
+//   subscription OnNodeCreated($worldId: ID!) {
+//     nodeCreated(worldId: $worldId) {
+//       id
+//       grid
+//       nodes {
+//         id
+//       }
+//     }
+//   }
+// `;
 
 export default () => {
   const {worldId} = useParams();
@@ -39,21 +39,21 @@ export default () => {
 
   const {loading, error, data, subscribeToMore} = useQuery(nodes, { variables: {id: worldId }});
 
-  useEffect(() => {
-    subscribeToMore({
-      document: worldSubscription,
-      variables: { worldId },
-      updateQuery: (prev, { subscriptionData }) => {
-        if (!subscriptionData.data) return prev;
-        const updatedWorld = subscriptionData.data.nodeCreated;
+  // useEffect(() => {
+  //   subscribeToMore({
+  //     document: worldSubscription,
+  //     variables: { worldId },
+  //     updateQuery: (prev, { subscriptionData }) => {
+  //       if (!subscriptionData.data) return prev;
+  //       const updatedWorld = subscriptionData.data.nodeCreated;
 
-        return Object.assign({}, prev, {
-          grid: updatedWorld.grid,
-          nodes: updatedWorld.nodes
-        });
-      }
-    })
-  }, [])
+  //       return Object.assign({}, prev, {
+  //         grid: updatedWorld.grid,
+  //         nodes: updatedWorld.nodes
+  //       });
+  //     }
+  //   })
+  // }, [])
 
   const [openNodeId, setOpenNodeId] = useState<string | null>(1);
 
@@ -63,7 +63,7 @@ export default () => {
     }
   }, [data]);
 
-  const [socket, setSocket] = useState();
+  const [socket, setSocket] = useState<any>();
 
   const onConnectHandler = () => {
     console.log('connected to socket!')
@@ -78,33 +78,31 @@ export default () => {
   }
 
   useEffect(() => {
-    const socket = io('https://defworld-api.phil-mac.repl.co', {
-      extraHeaders: {
-        "my-custom-header": "abcd"
-      }
-    });
-
-    setSocket(socket);
+    if (!socket) {
+      const newSocket = io('https://defworld-api.phil-mac.repl.co');
+      setSocket(newSocket);
+      return;
+    }
 
     socket.emit('joinWorld', {name: user.username, worldId });
-
     socket.on('connect', onConnectHandler);
     socket.on('broadcast', onBroadcastHandler);
 
+    
     return () => {
       socket.off('connect', onConnectHandler);
       socket.off('broadcast', onBroadcastHandler);
 
-      socket.disconnect();
+      socket?.disconnect();
     }
     
-  }, []);
+  }, [socket]);
 
   
 
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error.</p>;
-  
+
   return (
     <Page>
       <div className='flex w-full grow mt-0'>

@@ -17,9 +17,9 @@ const httpLink = new HttpLink({
   },
 });
 
-const wsLink = new GraphQLWsLink(createClient({
-  url: 'wss://defworld-api.phil-mac.repl.co/subscriptions',
-}));
+// const wsLink = new GraphQLWsLink(createClient({
+//   url: 'wss://defworld-api.phil-mac.repl.co/subscriptions',
+// }));
 
 const splitLink = split(
   ({ query }) => {
@@ -29,7 +29,8 @@ const splitLink = split(
     
     return isSubscription;
   },
-  wsLink,
+  // wsLink,
+  httpLink,
   httpLink
 );
 
@@ -39,11 +40,9 @@ const client = new ApolloClient({
 });
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
     <ApolloProvider client={client}>
       <BrowserRouter>
           <App />
       </BrowserRouter>
     </ApolloProvider>
-  </React.StrictMode>
 )

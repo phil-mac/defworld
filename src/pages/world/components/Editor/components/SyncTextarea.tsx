@@ -8,19 +8,29 @@ export default ({initialValue, socket, username, nodeId}) => {
   const sentOps = useRef([]);
   const pendingOps = useRef([]);
   const [content, setContent] = useState([]);
+
+  const [cursors, setCursors] = useState([{name: 'tester', selection: {start: 5, end: 12}}])
   
   useEffect(() => {
     if (!socket) return;
     socket.emit('joinNode', {name: username, nodeId });
     socket.on('textUpdated', applyOp);
     socket.on('opAcknowledged', processAck);
+    socket.on('initContent', initContent);
+    socket.on('selectionUpdated', updateSelection);
     
     return () => {
       socket.off('textUpdated', applyOp);
       socket.off('opAcknowledged', processAck);
+      socket.off('initContent', initContent);
+      socket.off('selectionUpdated', updateSelection);
       socket.emit('leaveNode', {name: username, nodeId });
     }
   }, [nodeId, socket])
+
+  function initContent({content}) {
+    setContent(content);
+  }
 
   function createOp(type, pos, text) {
     const op = {type, pos, text, rev: rev.current + 1};
@@ -58,13 +68,14 @@ export default ({initialValue, socket, username, nodeId}) => {
 
   function applyOp(op) {
     rev.current = op.rev;
-    // console.log("latest rev: ", rev.current)
     caretPos.current = textareaRef.current?.selectionStart || 0;
     console.log('caretPos: ', caretPos.current)
+
+    if (op.type === 'add' && op.pos < caretPos.current){
+      caretPos.current = caretPos.current + 1;
+    }
     setContent(current => current.slice(0, op.pos) + op.text + current.slice(op.pos));
   }
-
- 
 
   useEffect(() => {
     console.log("update content to: ", content)
@@ -95,35 +106,41 @@ export default ({initialValue, socket, username, nodeId}) => {
       caretPos.current = -1;
     }
   }, [draftContent])
-  
+
+  function updateSelection({name, selection}) {
+    console.log(name + ' at pos: ' + selection.start);
+  }
 
   return (
-    <textarea 
-      ref={textareaRef}
-      className='mt-2 flex-grow w-[300px] resize-none rounded' 
-      value={draftContent}
-      onChange={e => {
-        const text = e.nativeEvent.data;
-        const pos = e.target.selectionStart - 1;
-        const type = 'add';
-
-        caretPos.current = -1;
-        // caretPos.current = textareaRef.current?.selectionStart;
-        // console.log(e)
-
-        createOp(type, pos, text);
-
-        setDraftContent(e.target.value);
-        setContent(e.target.value);
-      }}
-      onSelect={e => {
-        // console.log(e.target.selectionStart)
-        // if (e.nativeEvent.type == 'mouseup'){
-        //   console.log('set cursor pos:', e.target.selectionStart)
-        //   setCursorPos(e.target.selectionStart);
-        // }
-      }}
+    <div className='flex flex-grow relative'>
+      <textarea 
+        ref={textareaRef}
+        className='mt-2 flex-grow w-[300px] resize-none rounded' 
+        value={draftContent}
+        onChange={e => {
+          const text = e.nativeEvent.data;
+          const pos = e.target.selectionStart - 1;
+          const type = 'add';
+  
+          caretPos.current = -1;
+          // caretPos.current = textareaRef.current?.selectionStart;
+          // console.log(e)
+  
+          createOp(type, pos, text);
+  
+          setDraftContent(e.target.value);
+          setContent(e.target.value);
+        }}
+        onSelect={e => {
+          console.log('onSelect: ', e.target.selectionStart)
+          socket.emit('syncSelection', {start: e.target.selectionStart})
+          // if (e.nativeEvent.type == 'mouseup'){
+          //   console.log('set cursor pos:', e.target.selectionStart)
+          //   setCursorPos(e.target.selectionStart);
+          // }
+        }}
       /> 
+    </div>
   )
 }
 
