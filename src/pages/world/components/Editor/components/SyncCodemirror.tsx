@@ -125,19 +125,25 @@ export default ({socket, username, nodeId, initialDoc, initialRev}) => {
     let cursorTooltipField = StateField.define({
       create: () => ([]),
       update(tooltips, tr) {
+        console.log("UPDATEEEE")
         const containsEffects = tr.effects?.length;
-        if (!tr.docChanged && !tr.selection && !containsEffects) return tooltips;
+        console.log('tr.docChanged: ', tr.docChanges);
+        console.log('tr.selection: ', tr.selection);
+        console.log('containsEffects: ', containsEffects);
+        if (!(tr.docChanged || tr.selection || containsEffects)) return tooltips;
         const heads = tr.state.selection.ranges.map(range => {
           tr.state.update()
           return range.head;
         })
 
+        console.log("my heads: ", heads)
+
         tr.effects = [
-          ...tr.effects, 
           ...heads.map(h => updateCursor.of({
             user: username, 
             pos: h
-          }))
+          })),
+          ...tr.effects, 
         ];
         tr.state.update({changes: [], effects: tr.effects});
 
@@ -145,9 +151,11 @@ export default ({socket, username, nodeId, initialDoc, initialRev}) => {
 
         const cursors = tr.effects.filter(e => e.is(updateCursor)).map(e => ({user: e.value.user, pos: e.value.pos}));
 
-        const first = getCursorTooltips(cursors)[0]
-        
-        let newTooltips =  [first, ...tooltips];
+        // const first = getCursorTooltips(cursors)[0]
+        // console.log({first})
+
+        let newTooltips =  [...getCursorTooltips(cursors), ...tooltips];
+        console.log('all newTooltips: ', newTooltips)
         newTooltips = uniqBy(newTooltips, 'user');
         return newTooltips;
       },
