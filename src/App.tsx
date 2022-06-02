@@ -11,13 +11,23 @@ export default () => {
     navigate('/1', { replace: true });
   }, []);
 
-  const [user, setUser] = useState({username: 'Phil', id: 1});
+  const ran = Math.floor(Math.random()*1000);
+  const username = 'user-' + ran;
+
+  // const [user, setUser] = useState(null);
+  const [user, setUser] = useState({username, id: 1});
+
+
 
   useEffect(() => {
     if (!user) {
       navigate('/join', { replace: true });
     }
   }, [])
+
+  if (!user) {
+    return <Join setUser={setUser} />
+  }
   
   return (
     <>

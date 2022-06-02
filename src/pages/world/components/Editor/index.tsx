@@ -1,8 +1,8 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { gql, useQuery } from "@apollo/client";
 import Button from 'components/Button';
 import { UserContext } from 'contexts/userContext';
-import SyncTextarea from './components/SyncTextarea';
+import SyncCodemirror from './components/SyncCodemirror';
 
 type Props = {
   nodeId: String;
@@ -36,6 +36,9 @@ export default ({nodeId, socket}: Props) => {
 
   const {loading, error, data } = useQuery(contentQuery, {variables: {nodeId}});
   const user = useContext(UserContext);
+
+  const [initialDoc, setInitialDoc] = useState('')
+  const [initialRev, setInitialRev] = useState('')
   
   // const [content, setContent] = useState('');
 
@@ -74,9 +77,29 @@ export default ({nodeId, socket}: Props) => {
   //     document.removeEventListener('keydown', runShortcutCallback);
   //   };
   // }, [run])
+
+  useEffect(() => {
+    if (!socket) return;
+    socket.emit('joinNode', {name: user.username, nodeId });
+    socket.on('initContent', initContent);
+    // socket.on('selectionUpdated', updateSelection);
+    
+    return () => {
+      socket.off('initContent', initContent);
+      // socket.off('selectionUpdated', updateSelection);
+      // TODO fix hardcoded name:
+      socket.emit('leaveNode', {name: 'Phil', nodeId });
+    }
+  }, [nodeId, socket])
+
+  function initContent ({doc, rev}) {
+    console.log('init', {rev, doc})
+    setInitialDoc(doc);
+    setInitialRev(rev);
+  }
   
   return (
-    <div className='flex flex-col px-4 w-full h-[700px]'>
+    <div className='flex flex-col px-4 w-full h-[500px]'>
       <div className='w-full flex-grow'>
         {loading && (<p>Loading...</p>)}
         {error && (<p>Error.</p>)}
@@ -87,12 +110,7 @@ export default ({nodeId, socket}: Props) => {
               onClick={run}>
               Run
             </Button>
-            <SyncTextarea 
-              initialValue={data?.node?.content} 
-              socket={socket} 
-              nodeId={nodeId} 
-              username={user.username} 
-            />
+            <SyncCodemirror socket={socket} nodeId={nodeId} username={user.username} initialDoc={initialDoc} initialRev={initialRev}/>
           </div>
         )}
       </div> 
