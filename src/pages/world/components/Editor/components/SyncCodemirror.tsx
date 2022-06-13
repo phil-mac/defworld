@@ -4,7 +4,8 @@ import {EditorState, ChangeSet, Text, StateField, StateEffect, StateEffectType }
 import {indentWithTab, defaultKeymap} from '@codemirror/commands';
 import {bracketMatching} from '@codemirror/language';
 import {closeBrackets} from '@codemirror/autocomplete';
-import { vim } from '@replit/codemirror-vim';
+// import { vim } from '@replit/codemirror-vim';
+import interact from '@replit/codemirror-interact';
 import { collab, getSyncedVersion, receiveUpdates, sendableUpdates, Update } from '@codemirror/collab';
 import uniqBy from 'lodash/uniqBy';
 
@@ -49,7 +50,6 @@ function peerExtension(startRev, socket) {
     }
 
     async receiveUpdateAck(didSucceed) {
-      // NOT USING didSucceed FOR NOW
       this.pushing = false;
       if (sendableUpdates(this.view.state).length) {
         setTimeout(() => this.push(), 100);
@@ -79,8 +79,8 @@ function peerExtension(startRev, socket) {
 
     destroy() {
       this.done = true;
-      // socket.off('pushUpdatesRes', this.receiveUpdateAck);
-      // socket.off('pullUpdatesRes', this.dispatchUpdates);
+      socket.removeAllListeners('pushUpdatesRes');
+      socket.removeAllListeners('pullUpdatesRes');
     }
   })
   
@@ -119,25 +119,21 @@ export default ({socket, username, nodeId, initialDoc, initialRev}) => {
     if (!socket) return;
     if (initialDoc === undefined) return;
     if (!entry.current || view.current) return;
-    
+
     let theme = EditorView.theme({}, {dark: true});
 
     let cursorTooltipField = StateField.define({
       create: () => ([]),
       update(tooltips, tr) {
-        console.log("UPDATEEEE")
         const containsEffects = tr.effects?.length;
-        console.log('tr.docChanged: ', tr.docChanges);
-        console.log('tr.selection: ', tr.selection);
-        console.log('containsEffects: ', containsEffects);
         if (!(tr.docChanged || tr.selection || containsEffects)) return tooltips;
         const heads = tr.state.selection.ranges.map(range => {
           tr.state.update()
           return range.head;
         })
 
-        console.log("my heads: ", heads)
 
+        // ---- TODO: clearly not a good way to sync cursor position, causing bugs and needs fixing ----
         tr.effects = [
           ...heads.map(h => updateCursor.of({
             user: username, 
@@ -147,25 +143,36 @@ export default ({socket, username, nodeId, initialDoc, initialRev}) => {
         ];
         tr.state.update({changes: [], effects: tr.effects});
 
-        // const mappedEffects = tr.effects.map(e => e.map(tr.changes));
-
         const cursors = tr.effects.filter(e => e.is(updateCursor)).map(e => ({user: e.value.user, pos: e.value.pos}));
 
-        // const first = getCursorTooltips(cursors)[0]
-        // console.log({first})
-
         let newTooltips =  [...getCursorTooltips(cursors), ...tooltips];
-        console.log('all newTooltips: ', newTooltips)
         newTooltips = uniqBy(newTooltips, 'user');
+        return [];
         return newTooltips;
+        // ---------------------------------
       },
       provide: f => showTooltip.computeN([f], state => state.field(f))
     })
 
+    const interactRules = {
+      rules: [
+          {
+            regexp: /-?\b\d+\.?\d*\b/g,
+            cursor: "ew-resize",
+            onDrag: (text, setText, e) => {
+              const newVal = Number(text) + e.movementX;
+              if (isNaN(newVal)) return;
+              setText(newVal.toString());
+            },
+          }
+        ]
+    }
+
     let startState = EditorState.create({
       doc: initialDoc,
       extensions: [
-        vim(),
+        // vim(),
+        interact(interactRules),
         keymap.of(defaultKeymap),
         keymap.of([indentWithTab]),
         lineNumbers(),
@@ -182,10 +189,16 @@ export default ({socket, username, nodeId, initialDoc, initialRev}) => {
       state: startState,
       parent: entry.current
     });
+
+    return () => {
+      console.log('remove peer extension listeners')
+      socket.removeAllListeners('pushUpdatesRes');
+      socket.removeAllListeners('pullUpdatesRes');
+    }
   }, [entry.current, socket, initialDoc, initialRev]);
 
   return (
-    <div ref={entry} className='bg-gray-700 w-[300px] min-h-[300px]'/>
+    <div ref={entry} className='flex-grow h-full'/>
   )
 }
 

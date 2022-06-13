@@ -1,3 +1,7 @@
+//  NOTE:
+//  This is the v1 textarea that was used to experiment with implementing OT from scratch
+//  After switching to CodeMirror most of this logic was removed, to use CodeMirror Collab module instead
+
 import Button from 'components/Button';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 

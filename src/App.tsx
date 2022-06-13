@@ -8,16 +8,15 @@ import { UserContext } from 'contexts/userContext';
 export default () => {
   let navigate = useNavigate();
   React.useEffect(() => {
+    // navigate to world 1 immediately, to speed development testing
     navigate('/1', { replace: true });
   }, []);
 
+  // generate random player name, to speed development testing
   const ran = Math.floor(Math.random()*1000);
-  const username = 'user-' + ran;
+  const username = 'player-' + ran;
 
-  // const [user, setUser] = useState(null);
   const [user, setUser] = useState({username, id: 1});
-
-
 
   useEffect(() => {
     if (!user) {
